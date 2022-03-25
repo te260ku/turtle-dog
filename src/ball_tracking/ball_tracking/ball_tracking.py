@@ -27,6 +27,7 @@ class BallTracker(Node):
         self.linear = 0.0
         self.angular = 0.0
 
+        # 追従する対象の画像中の幅(画像中の対象物の大きさが常にこの値になるように制御指令を計算する)
         self.target_width = 150
         
 
@@ -42,18 +43,15 @@ class BallTracker(Node):
 
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-        # lower_color = np.array([0, 0, 0])
-        # upper_color = np.array([179,128,100])
+        # 緑色のボールを検出する
         lower_color = np.array([30, 64, 0])
         upper_color = np.array([90,255,255])
-
         mask = cv2.inRange(hsv, lower_color, upper_color)
-
- 
-        l = a = 0.0
-
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        l = a = 0.0
         rects = []
+        
         for contour in contours:
             hull = cv2.convexHull(contour)
             rect = cv2.boundingRect(hull)
@@ -73,46 +71,25 @@ class BallTracker(Node):
 
             cv2.drawMarker(frame, (cx, cy), color=(255, 0, 0), markerType=cv2.MARKER_TILTED_CROSS, thickness=2)
 
-
-            # 目標位置との差分を計算する
-            
-            dw = 0.005 * (self.target_width - w)        # 前後方向
+            # 目標位置との差分を計算する            
+            dw = 0.005 * (self.target_width - w)    # 前後方向
             dx = 0.005 * (640/2 - cx)   # 旋回方向
             
-            # dw = self.target_width - w 
-            # dx = 640/2 - cx   # 旋回方向
-
-
-            # 前後方向
-            # if abs(dw) > 10.0:
-            #     if dw > 0:
-            #         b = 0.05
-            #     else:
-            #         b = -0.05
             l = 0.0 if abs(dw) < 0.03 else dw   # ±10未満ならゼロにする
-            # # 前後方向のソフトウェアリミッタ
+            # 前後方向のソフトウェアリミッタ
             l = 0.05 if l > 0.05 else l
             l = -0.05 if l < -0.05 else l
             
-
-            # 旋回
-            # if abs(dx) > 20.0:
-            #     if dx > 0:
-            #         d = 0.3
-            #     else:
-            #         d = -0.3
-            a = 0.0 if abs(dx) < 0.3 else dx   # ±20未満ならゼロにする
-            # 旋回方向のソフトウェアリミッタ(±100を超えないように)
+            a = 0.0 if abs(dx) < 0.3 else dx    # ±20未満ならゼロにする
+            # 旋回方向のソフトウェアリミッタ
             a =  0.5 if a >  0.5 else a
             a = -0.5 if a < -0.5 else a
 
 
             print('dw=%f l=%f dx=%f a=%f'%(dw, l, dx, a))
-            # print('dx=%f dw=%f'%(dx, dw))
 
         self.linear = l
         self.angular = a
-
 
         cv2.imshow("camera", frame)
         cv2.waitKey(1)
@@ -120,11 +97,8 @@ class BallTracker(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
     ball_tracker = BallTracker()
-
     rclpy.spin(ball_tracker)
-
     ball_tracker.destroy_node()
     rclpy.shutdown()
 
