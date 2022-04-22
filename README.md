@@ -1,7 +1,8 @@
-# turtle-dog
+# TurtleDog
 
-カラーボールを追いかけるロボットのプログラム。
+## 概要
 
+- カラーボールを追いかけるロボットのプログラム。
 - ハードウェア▷Turtebot3 waffle pi
 - 制御▷ROS2 Foxy
 - 画像認識▷OpenCV
@@ -11,4 +12,4 @@
 
 
 ## デモ動画
-https://www.youtube.com/watch?v=SOiVjN1Of2Q
+- https://www.youtube.com/watch?v=SOiVjN1Of2Q
